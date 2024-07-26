@@ -49,6 +49,10 @@ textarea:focus {
   outline-color: #1d4661;
 }
 
+textarea:disabled {
+  border-color:  #627f92;
+}
+
 .btn-container {
   display: flex;
   justify-content: flex-end;
@@ -68,7 +72,7 @@ textarea:focus {
   min-width: fit-content;
 }
 
-.btn-container > button:nth-child(2):disabled {
+.btn-container > button:disabled {
   background-color: #627f92;
   cursor: not-allowed;
 }

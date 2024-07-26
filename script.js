@@ -136,6 +136,8 @@ document.addEventListener("DOMContentLoaded", function () {
    * Play button "click" event listener.
    */
   playBtn.addEventListener("click", async function () {
+    translateBtn.disabled = true;
+    inputField.disabled = true;
     playBtn.disabled = true;
     const textResult = outputField.textContent;
     for (let i = 0; i < textResult.length; i++) {
@@ -159,6 +161,8 @@ document.addEventListener("DOMContentLoaded", function () {
       await new Promise((resolve) => setTimeout(resolve, 400));
     }
     playBtn.disabled = false;
+    inputField.disabled = false;
+    translateBtn.disabled = false;
   });
 });
 
@@ -167,7 +171,11 @@ document.addEventListener("DOMContentLoaded", function () {
  */
 translateBtn.addEventListener("click", () => {
   // parse input
-  const inputText = inputField.value.trim().toUpperCase();
+  const inputText = inputField.value
+    .trim()
+    .replaceAll(/\s{2,}/g, " ")
+    .toUpperCase();
+
   if (inputText === "") {
     outputField.style.color = "#D21404";
     outputField.textContent = "no input provided";
