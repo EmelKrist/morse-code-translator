@@ -46,15 +46,16 @@ textarea {
 }
 
 textarea:focus {
-  outline-color: #1D4661;
+  outline-color: #1d4661;
 }
 
 .btn-container {
   display: flex;
   justify-content: flex-end;
+  gap: 15px;
 }
 
-button {
+.btn-container > button {
   background-color: #43708f;
   color: #ffffff;
   border: none;
@@ -63,6 +64,13 @@ button {
   outline: none;
   margin: 1em 0;
   cursor: pointer;
+  width: 120px;
+  min-width: fit-content;
+}
+
+.btn-container > button:nth-child(2):disabled {
+  background-color: #627f92;
+  cursor: not-allowed;
 }
 
 button:hover {
