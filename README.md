@@ -2,11 +2,12 @@
 
 ### -- --- .-. ... ./-.-. --- -.. ./- .-. .- -. ... .-.. .- - --- .-.
 
-![](https://img.shields.io/badge/Development:-in_progress-red)
+![](https://img.shields.io/badge/Development:-complete-green)
 
 ### Description.
 
 This is an application for translating Morse code into text and vice versa.
+It can reproduce the translation result in the form of text speech and Morse code tone.
 
 ### Technologies.
 
