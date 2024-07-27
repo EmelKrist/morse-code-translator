@@ -66,80 +66,104 @@ for (const key in morseCode) {
   }
 }
 
+// HTML components init
 const inputField = document.getElementById("input");
 const translateBtn = document.getElementById("translate-btn");
 const outputField = document.getElementById("translate-res");
 const playBtn = document.getElementById("play-btn");
 
-document.addEventListener("DOMContentLoaded", function () {
-  const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-  let oscillator = null;
-  let gainNode = null;
+// variables init
+const audioContext = new (window.AudioContext || window.AudioContext)();
+let oscillator = null;
+let gainNode = null;
 
-  /**
-   * Function to start sound modulation.
-   */
-  function startTone() {
-    oscillator = audioContext.createOscillator();
-    gainNode = audioContext.createGain();
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-    oscillator.start();
+/**
+ * Function to start sound modulation.
+ */
+function startTone() {
+  oscillator = audioContext.createOscillator();
+  gainNode = audioContext.createGain();
+  oscillator.connect(gainNode);
+  gainNode.connect(audioContext.destination);
+  oscillator.start();
+}
+
+/**
+ * Function to stop sound modulation.
+ */
+function stopTone() {
+  if (oscillator) {
+    oscillator.stop();
+    oscillator.disconnect();
+    gainNode.disconnect();
+    oscillator = null;
+    gainNode = null;
   }
+}
 
-  /**
-   * Function to stop sound modulation.
-   */
-  function stopTone() {
-    if (oscillator) {
-      oscillator.stop();
-      oscillator.disconnect();
-      gainNode.disconnect();
-      oscillator = null;
-      gainNode = null;
-    }
-  }
+/**
+ * Function to play dot symbol of the Morse code (0.1 sec of tone).
+ */
+function playDot() {
+  startTone();
+  setTimeout(stopTone, 100);
+}
 
-  /**
-   * Function to play dot symbol of the Morse code (0.1 sec of tone).
-   */
-  function playDot() {
-    startTone();
-    setTimeout(stopTone, 100);
-  }
+/**
+ * Function to play dash symbol of the Morse code (0.3 sec of tone).
+ */
+function playDash() {
+  startTone();
+  setTimeout(stopTone, 300);
+}
 
-  /**
-   * Function to play dash symbol of the Morse code (0.3 sec of tone).
-   */
-  function playDash() {
-    startTone();
-    setTimeout(stopTone, 300);
-  }
+/**
+ * Function to play pause between letters.
+ * @returns promise of 0.6 sec. timeout
+ */
+function playPause() {
+  return new Promise((resolve) => setTimeout(resolve, 600));
+}
 
-  /**
-   * Function to play pause between letters.
-   * @returns promise of 0.6 sec. timeout
-   */
-  function playPause() {
-    return new Promise((resolve) => setTimeout(resolve, 600));
-  }
+/**
+ * Function to play pause between words.
+ * @returns promise of 1.8 sec. timeout
+ */
+function playSlash() {
+  return new Promise((resolve) => setTimeout(resolve, 1800));
+}
 
-  /**
-   * Function to play pause between words.
-   * @returns promise of 1.8 sec. timeout
-   */
-  function playSlash() {
-    return new Promise((resolve) => setTimeout(resolve, 1800));
-  }
+/**
+ * Function to play text.
+ * @param {String} text
+ */
+function playText(text) {
+  return new Promise((resolve) => {
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.onend = () => resolve();
+    window.speechSynthesis.speak(utterance);
+  });
+}
 
-  /**
-   * Play button "click" event listener.
-   */
-  playBtn.addEventListener("click", async function () {
-    translateBtn.disabled = true;
-    inputField.disabled = true;
-    playBtn.disabled = true;
-    const textResult = outputField.textContent;
+/**
+ * Function to check if the text is the Morse code.
+ * @param {String} text
+ * @returns true/false
+ */
+function isMorseCode(text) {
+  return text.includes(".");
+}
+
+/**
+ * Play button "click" event listener.
+ */
+playBtn.addEventListener("click", async function () {
+  translateBtn.disabled = true;
+  inputField.disabled = true;
+  playBtn.disabled = true;
+  
+  const textResult = outputField.textContent;
+  if (isMorseCode(textResult)) {
     for (let i = 0; i < textResult.length; i++) {
       switch (textResult[i]) {
         case ".":
@@ -155,15 +179,18 @@ document.addEventListener("DOMContentLoaded", function () {
           await playSlash();
           break;
         default:
-          console.log(`Неизвестный символ: ${textResult[i]}`);
+          await playText(textResult[i]);
       }
       // Пауза между символами
       await new Promise((resolve) => setTimeout(resolve, 400));
     }
-    playBtn.disabled = false;
-    inputField.disabled = false;
-    translateBtn.disabled = false;
-  });
+  } else {
+    await playText(textResult);
+  }
+
+  playBtn.disabled = false;
+  inputField.disabled = false;
+  translateBtn.disabled = false;
 });
 
 /**
@@ -177,16 +204,16 @@ translateBtn.addEventListener("click", () => {
     .toUpperCase();
 
   if (inputText === "") {
+    playBtn.disabled = true;
     outputField.style.color = "#D21404";
     outputField.textContent = "no input provided";
     return;
   }
   outputField.style.color = "#08283d";
 
-  if (inputText.includes(".")) {
+  if (isMorseCode(inputText)) {
     /* the input contains dots, it is assumed to be 
-  Morse code and should be translated */
-    playBtn.disabled = true;
+    Morse code and should be translated */
     const morseWords = inputText.split("/");
     const translatedWords = morseWords.map((morseWord) => {
       const morseChars = morseWord.split(" ");
@@ -209,6 +236,7 @@ translateBtn.addEventListener("click", () => {
       return morseChars.join(" ");
     });
     outputField.textContent = translatedWords.join("/");
-    playBtn.disabled = false;
   }
+
+  playBtn.disabled = false;
 });
